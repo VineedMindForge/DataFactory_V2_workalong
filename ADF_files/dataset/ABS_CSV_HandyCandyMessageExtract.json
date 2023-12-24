@@ -5,6 +5,9 @@
 			"referenceName": "adfbyexamplesa",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "Chapter 3"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
