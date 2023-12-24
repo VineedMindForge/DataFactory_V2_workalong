@@ -1,0 +1,24 @@
+{
+	"name": "ABS_CSV_HandyCandyMessageExtract",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adfbyexamplesa",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "HandyCandy.csv",
+				"folderPath": "datalake",
+				"container": "output"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

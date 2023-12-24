@@ -1,5 +1,5 @@
 {
-	"name": "ImportSweetTreatsSales",
+	"name": "CopyHandyCandyMessagestoCSV",
 	"properties": {
 		"activities": [
 			{
@@ -16,24 +16,29 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "ParquetSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "azure-data-factory-by-example-main/SampleData/SweetTreats/",
-							"wildcardFileName": "*.csv",
+							"wildcardFolderPath": "datalake",
+							"wildcardFileName": "*.parquet",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "ParquetReadSettings"
 						}
 					},
 					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "truncate table dbo.sales_load",
-						"writeBehavior": "insert",
-						"sqlWriterUseTableLock": false,
-						"disableMetricsCollection": false
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "MergeFiles"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
 					},
 					"enableStaging": false,
 					"translator": {
@@ -47,13 +52,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ABS_CSV_SweetTreats",
+						"referenceName": "ABS_PAR_HandyCandy",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "ASQL_dboSalesLoad",
+						"referenceName": "ABS_CSV_HandyCandyMessageExtract",
 						"type": "DatasetReference"
 					}
 				]
