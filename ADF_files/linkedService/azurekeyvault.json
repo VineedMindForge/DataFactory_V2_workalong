@@ -1,0 +1,10 @@
+{
+	"name": "azurekeyvault",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://adfbyegvineed-kv.vault.azure.net/"
+		}
+	}
+}
