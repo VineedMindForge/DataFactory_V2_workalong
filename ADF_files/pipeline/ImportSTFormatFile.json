@@ -1,0 +1,253 @@
+{
+	"name": "ImportSTFormatFile",
+	"properties": {
+		"activities": [
+			{
+				"name": "Import sales data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set RunSeqNo variable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SourceFileName",
+								"value": "$$FILEPATH"
+							},
+							{
+								"name": "RunSeqNo",
+								"value": {
+									"value": "@variables('RunSeqNo')",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table dbo.sales_load",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ABS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": "sampledata",
+							"Directory": {
+								"value": "@pipeline().parameters.Directory",
+								"type": "Expression"
+							},
+							"File": {
+								"value": "@pipeline().parameters.File",
+								"type": "Expression"
+							},
+							"LinkedSecretConnection": "SecretConnectionString"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ASQL_dboSalesLoad",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Lookup RunSeqNo",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[LogPipelineStart]",
+						"storedProcedureParameters": {
+							"Comments": {
+								"type": "String",
+								"value": {
+									"value": "Pipeline @{pipeline().Pipeline} executed in @{pipeline().DataFactory} - loading file \"@{pipeline().parameters.Directory}/@{pipeline().parameters.File}\"",
+									"type": "Expression"
+								}
+							},
+							"PipelineRunId": {
+								"type": "Guid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"RunStartDateTime": {
+								"type": "DateTime",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ASQL_dboSalesLoad",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Log pipeline outcome",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Import sales data",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[LogPipelineEnd]",
+					"storedProcedureParameters": {
+						"FilesRead": {
+							"value": {
+								"value": "@activity('Import sales data').output.filesRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "@activity('Import sales data').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RowsRead": {
+							"value": {
+								"value": "@activity('Import sales data').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RunEndDateTime": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"RunSeqNo": {
+							"value": {
+								"value": "@variables('RunSeqNo')",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"RunStatus": {
+							"value": {
+								"value": "@if(equals(activity('Import sales data').output.executionDetails[0].status,'Failed' ),'Failed' ,'Done' )",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AdfByExample",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Set RunSeqNo variable",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup RunSeqNo",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "RunSeqNo",
+					"value": {
+						"value": "@int(activity('Lookup RunSeqNo').output.firstRow.RunSeqNo)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Directory": {
+				"type": "string"
+			},
+			"File": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"RunSeqNo": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "Chapter 6"
+		},
+		"annotations": []
+	}
+}
