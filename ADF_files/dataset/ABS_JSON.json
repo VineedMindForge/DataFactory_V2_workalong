@@ -1,0 +1,55 @@
+{
+	"name": "ABS_JSON",
+	"properties": {
+		"description": "It will be able to represent any JSON file(s)\nin any Azure blob storage account",
+		"linkedServiceName": {
+			"referenceName": "Anyblobstorage",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ConnectionSecret": {
+					"value": "@dataset().LinkedServiceConnectionSecret",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"Container": {
+				"type": "string"
+			},
+			"Directory": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"File": {
+				"type": "string",
+				"defaultValue": "."
+			},
+			"LinkedServiceConnectionSecret": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Chapter 5"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().File",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().Directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().Container",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": {}
+	}
+}
