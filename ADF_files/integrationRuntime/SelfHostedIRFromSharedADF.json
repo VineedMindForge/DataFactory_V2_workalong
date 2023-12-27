@@ -1,0 +1,7 @@
+{
+	"name": "SelfHostedIRFromSharedADF",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "/subscriptions/72a48a2b-1237-4e8e-87ab-e5a56bb062eb/resourcegroups/adfbyexample-rg/providers/Microsoft.DataFactory/factories/shared-adf-selfhostedir/integrationruntimes/SelfHostedIR"
+	}
+}
