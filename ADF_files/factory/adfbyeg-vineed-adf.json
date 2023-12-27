@@ -1,0 +1,9 @@
+{
+	"name": "adfbyeg-vineed-adf",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ccd7891c-f667-4680-a4bc-3b80a3bb1c06",
+		"tenantId": "35acaab9-c1c7-4b0f-b19c-7029c50b9d2d"
+	}
+}
