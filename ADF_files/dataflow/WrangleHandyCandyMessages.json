@@ -1,0 +1,23 @@
+{
+	"name": "WrangleHandyCandyMessages",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"folder": {
+			"name": "Chapter 9"
+		},
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "ABD_PAR_HandyCandyParquet",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~>  ABD_PAR_HandyCandyParquet",
+					"dataset": {
+						"referenceName": "ABD_PAR_HandyCandyParquet",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared ABD_PAR_HandyCandyParquet = let AdfDoc = AzureStorage.BlobContents(\"https://adfbyexvineedsa.blob.core.windows.net/output/datalake/HandyCandy.parquet\"), Parquet = Parquet.Document(AdfDoc) in Parquet;\r\nshared UserQuery = let Source = #\"ABD_PAR_HandyCandyParquet\",\r\n  #\"Removed columns\" = Table.RemoveColumns(Source, {\"TransactionId\", \"StoreId\"}),\r\n  #\"Changed column type\" = Table.TransformColumnTypes(#\"Removed columns\", {{\"TransactionDate\", type datetime}}) in #\"Changed column type\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}
