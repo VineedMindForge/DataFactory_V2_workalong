@@ -2,7 +2,7 @@
 	"name": "ABD_PAR_HandyCandyParquet",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "adfbyeg_kvauth",
+			"referenceName": "adfbyexamplesa",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
